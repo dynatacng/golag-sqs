@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/google/uuid"
 	"github.com/kr/pretty"
 )
 
@@ -26,13 +27,14 @@ func main() {
 
 	// send the message
 	sendParam := &sqs.SendMessageInput{
-		MessageBody:  aws.String("here is the message body"),
+		MessageBody:  aws.String(uuid.New().String()),
 		QueueUrl:     aws.String(os.Getenv("clement_AWS_QUEUE")),
 		DelaySeconds: aws.Int64(3),
+		// MessageGroupId:         aws.String(MessageGroup),
+		// MessageDeduplicationId: aws.String(uuid.New().String()), // needs to be *string
 	}
 	sendResponse, err := svc.SendMessage(sendParam)
 	if err != nil {
-		fmt.Println("=========")
 		fmt.Println(err)
 		panic("failed to send message")
 	}
@@ -44,6 +46,7 @@ func main() {
 		MaxNumberOfMessages: aws.Int64(5),
 		VisibilityTimeout:   aws.Int64(30),
 		WaitTimeSeconds:     aws.Int64(20),
+		//AttributeNames: []*string{aws.String("Test"), // Required},
 	}
 	receiveResponse, err := svc.ReceiveMessage(receiveParam)
 	if err != nil {
